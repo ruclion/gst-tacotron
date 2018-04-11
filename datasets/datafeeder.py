@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import re
 import random
 import tensorflow as tf
 import threading
@@ -55,8 +56,8 @@ class DataFeeder(threading.Thread):
     if hparams.use_cmudict:
       cmudict_path = os.path.join(self._datadir, 'cmudict-0.7b')
       if not os.path.isfile(cmudict_path):
-        raise Exception('If use_cmudict=True, you must download ' +
-          'http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/cmudict-0.7b to %s'  % cmudict_path)
+        raise Exception('If use_cmudict=True, you must download cmu dictionary first. ' +
+          'Run shell as:\n wget -P %s http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/cmudict-0.7b'  % self._datadir)
       self._cmudict = cmudict.CMUDict(cmudict_path, keep_ambiguous=False)
       log('Loaded CMUDict with %d unambiguous entries' % len(self._cmudict))
     else:
@@ -104,7 +105,8 @@ class DataFeeder(threading.Thread):
     meta = self._metadata[self._offset]
     self._offset += 1
 
-    text = meta[3]
+    _punctuation_re = re.compile(r'([\.,"\-_:]+)')
+    text =  re.sub(_punctuation_re, r' \1 ', meta[3])
     if self._cmudict and random.random() < _p_cmudict:
       text = ' '.join([self._maybe_get_arpabet(word) for word in text.split(' ')])
 
