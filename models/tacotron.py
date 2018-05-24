@@ -72,22 +72,21 @@ class Tacotron():
         if hp.use_gst:
           # Style attention
           style_attention = MultiheadAttention(
-            tf.expand_dims(refnet_outputs, axis=1),                                   # [N, 1, 128]
+            tf.tanh(tf.expand_dims(refnet_outputs, axis=1)),                                   # [N, 1, 128]
             tf.tile(tf.expand_dims(gst_tokens, axis=0), [batch_size,1,1]),            # [N, hp.num_gst, 256/hp.num_heads]   
             num_heads=hp.num_heads,
             num_units=128,
             attention_type=hp.style_att_type)
 
           # Apply tanh to compress both encoder state and style embedding to the same scale.
-          style_embeddings = tf.nn.tanh(style_attention.multi_head_attention())                   # [N, 1, 256]
+          style_embeddings = style_attention.multi_head_attention()                   # [N, 1, 256]
         else:
           style_embeddings = tf.expand_dims(refnet_outputs, axis=1)                   # [N, 1, 128]
       else:
-        #raise ValueError("TODO: add weight when there is no reference during inference")
         print("Use random weight for GST.")
         random_weights = tf.random_uniform([hp.num_heads, hp.num_gst], maxval=1.0, dtype=tf.float32)
         random_weights = tf.nn.softmax(random_weights, name="random_weights")
-        style_embeddings = tf.matmul(random_weights, gst_tokens)
+        style_embeddings = tf.matmul(random_weights, tf.nn.tanh(gst_tokens))
         style_embeddings = tf.reshape(style_embeddings, [1, 1] + [hp.num_heads * gst_tokens.get_shape().as_list()[1]])
 
       # Add style embedding to every text encoder state
@@ -101,8 +100,8 @@ class Tacotron():
         alignment_history=True,
         output_attention=False)                                                  # [N, T_in, 256]
 
-      # Concatenate attention context vector and RNN cell output into a 512D vector.
-      concat_cell = ConcatOutputAndAttentionWrapper(attention_cell)              # [N, T_in, 512]
+      # Concatenate attention context vector and RNN cell output.
+      concat_cell = ConcatOutputAndAttentionWrapper(attention_cell)              
 
       # Decoder (layers specified bottom to top):
       decoder_cell = MultiRNNCell([

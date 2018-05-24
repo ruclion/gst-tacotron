@@ -6,10 +6,10 @@ A tensorflow implementation of the [Style Tokens: Unsupervised Style Modeling, C
 ### Audio Samples
 
   * **[Audio Samples](https:///syang1993.github.io/gst-tacotron/)** from models trained using this repo.
-    * This set was trained for 100K steps on the [Blizzard 2013 dataset](https://www.synsig.org/index.php/Blizzard_Challenge_2013)
+    * This set was trained using the [Blizzard 2013 dataset](https://www.synsig.org/index.php/Blizzard_Challenge_2013) with and without global style tokens (GSTs).
       * I found the synthesized audio can learn the prosody of the reference audio.
-      * The audio quality isn't so good. Maybe more data and more training steps will improve it.
-    * More samples and analysis will come soon.
+      * The audio quality isn't so good as the paper. Maybe more data, more training steps and the wavenet vocoder will improve the quality.
+      
 
 ## Quick Start:
 
@@ -20,9 +20,9 @@ A tensorflow implementation of the [Style Tokens: Unsupervised Style Modeling, C
 2. Install the latest version of [TensorFlow](https://www.tensorflow.org/install/) for your platform. For better performance, install with GPU support if it's available. This code works with TensorFlow 1.4.
 
 3. Install requirements:
-   '''
+   ```
    pip install -r requirements.txt
-   '''
+   ```
 
 ### Training
 
@@ -66,14 +66,6 @@ A tensorflow implementation of the [Style Tokens: Unsupervised Style Modeling, C
 ## Notes:
 
   Since the paper didn't talk about the details of the style-attention layer, I'm a little confused about the global style tokens. For the token embedding (GSTs) size, the paper said that they set the size to 256/h, where `h` is the number of heads. I'm not sure whether I should initialize the same or different GSTs as attention memory for all heads.
-
-## Todo:
-- [x] Update the attention mechanism for global style attention paper [Style Tokens: Unsupervised Style Modeling, Control and Transfer in End-to-End Speech Synthesis](https://arxiv.org/abs/1803.09017)
-- [x] Evaluation process and demos
-- [x] Usage for this repo.
-- [ ] Add GMM-attention for the paper [Towards End-to-End Prosody Transfer for Expressive Speech Synthesis with Tacotron](https://arxiv.org/abs/1803.09047).
-- [ ] Multi-speaker model
-
 
 ## Reference
   -  Keithito's implementation of tacotron: https://github.com/keithito/tacotron
